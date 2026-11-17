@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web GIS Flores Timur - GeoServer + LeafletJS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html,
+        body,
+        #map {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <!-- Library Leaflet, jQuery, dan L.Geoserver -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="lib/L.Geoserver.js"></script>
+
+    <script>
+        // 1. Inisialisasi peta Flores Timur
+        var map = L.map("map").setView([-8.34, 122.98], 10);
+
+        // 2. Basemap OpenStreetMap
+        var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // 3. Memanggil Layer WMS Sesuai Nama Persis di GeoServer Anda
+        var wmsBatasKecamatan = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:ADMINISTRASIKECAMATAN_AR",
+            transparent: true
+        }).addTo(map);
+
+        var wmsJalan = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:JALAN_LN_25K",
+            transparent: true
+        }).addTo(map);
+
+        var wmsPemerintahan = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:PEMERINTAHAN_PT_25K",
+            transparent: true
+        }).addTo(map);
+
+        // 4. Menampilkan Legenda Administrasi Kecamatan
+        var layerLegend = L.Geoserver.legend("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:ADMINISTRASIKECAMATAN_AR"
+        }).addTo(map);
+
+        // 5. Kontrol Checklist Layer di Pojok Kanan Atas
+        var baseMaps = {
+            "OpenStreetMap": osm
+        };
+        
+        var overlayMaps = {
+            "Administrasi Kecamatan": wmsBatasKecamatan,
+            "Jalan": wmsJalan,
+            "Pemerintahan": wmsPemerintahan
+        };
+        
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+    </script>
+</body>
+
+</html>
+
